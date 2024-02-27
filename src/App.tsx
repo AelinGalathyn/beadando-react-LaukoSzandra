@@ -14,7 +14,7 @@ const App: React.FC = () => {
     const [categories, setCategories] = useState<string[]>([]);
     const [showNewItemForm, setShowNewItemForm] = useState(false);
     const [currentCategory, setCurrentCategory] = useState('all');
-
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleNewItemSubmit = (newItemData: NewItemFormData) => {
         const id = Math.random()*100;
@@ -61,9 +61,23 @@ const App: React.FC = () => {
         }
     };
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+    };
+
+
+    const visibleItems = items.filter(item => {
+        const inCurrentCategory = currentCategory === 'Minden' || item.category === currentCategory;
+        const matchesSearchQuery = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return inCurrentCategory && matchesSearchQuery;
+    });
+
+    const visibleSearch = items.length>0;
+
 
     return (
-        <div className="container d-flex flex-column align-items-center justify-content-center" style={{height: '100vh'}}>
+        <div className="container d-flex flex-column align-items-center justify-content-center"
+             style={{height: '100vh'}}>
             <div>
                 {categories.map((category) => (
                     <CategoryButton
@@ -75,13 +89,23 @@ const App: React.FC = () => {
                 <button className="btn btn-primary ms-2" onClick={toggleNewItemForm}>Új</button>
             </div>
 
+            {visibleSearch && (
+                <input
+                    className="m-2"
+                    type="text"
+                    placeholder="Keresés"
+                    value={searchQuery}
+
+                    onChange={handleSearchChange}/>
+            )}
+
             {showNewItemForm && (
                 <NewItemForm onNewItemSubmit={handleNewItemSubmit}/>
             )}
 
             {!showNewItemForm && (
                 <ItemList
-                    items={currentCategory === 'Minden' ? items : items.filter(item => item.category === currentCategory)}
+                    items={visibleItems}
                     onDeleteItem={handleDeleteItem}
                 />
             )}
